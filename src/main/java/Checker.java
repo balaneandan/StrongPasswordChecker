@@ -29,14 +29,11 @@
 
 public class Checker {
 
-    // public static final Pattern passPattern = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
-    // passPattern.matcher(password).matches();
 
-    public static boolean isStrong(String password)  // check if password has a lower,an  Upper case and a digit
-    {
+    public static int requiredReplaceL0=0;
+    public static int requiredReplaceL1=0;
+    public static int requiredReplaceL2=0;
 
-        return hasLowerCase(password) && hasUpperCase(password) && hasDigit(password) && hasRightLength(password);
-    }
     public static boolean hasLowerCase(String password)
     {
         return password.chars().anyMatch(c-> Character.isLetter(c) && Character.isLowerCase(c));
@@ -50,27 +47,13 @@ public class Checker {
         return password.chars().anyMatch(Character::isDigit);
     }
 
-    public static int hasThreeRepeatingChars(String password)
-    {
-        int result = 0;
-        for(int i=0;i<password.length()-2;i++)
-        {
-            if(password.charAt(i) == password.charAt(i+1) && password.charAt(i+1) == password.charAt(i+2))
-            {
-                return i+1;
-            }
-        }
-        return -1;
-
-    }
-    public static boolean hasRightLength(String password)
-    {
-        return password.length() >= 6 && password.length() <= 20;
-    }
 
     public static int duplicate(String password)
     {
         int nrReplaces = 0;
+        int one =0;
+        int two=0;
+        int three =0;
         int start = 0;
         int i=0;
         while( i < password.length())
@@ -83,10 +66,23 @@ public class Checker {
             if (i-start >=3)
             {
                 nrReplaces += (i-start)/3;          // este nevoie de length/3 actiuni
+
+                if(((i-start)-2) % 3  == 1)
+                    one++;
+                if(((i-start)-2) % 3  == 2)
+                    two++;
+                if(((i-start)-2) % 3  == 2)
+                    three++;
+
             }
         }
+        requiredReplaceL1 = one;
+        requiredReplaceL2 = two;
+        requiredReplaceL0 = three;
         return  nrReplaces;
     }
+
+
     public static int strongPasswordChecker(String password)
     {
         int MINIM=0;
@@ -114,11 +110,46 @@ public class Checker {
                                                                                     // case 3
         if(password.length() > 20)         // putem satisface constrangerea de length folosind operatii de delete, iar apoi vom folosi replace pentru a satisface celelalte 2 constrangeri
         {
+
             int nrReplaces = 0;
             nrReplaces = duplicate(password);
             int nrDeletes = password.length()-20;
-            nrReplaces-=nrDeletes;
-            MINIM+=nrDeletes+Math.max(nrReplaces,needsLUD);
+            int tempDelete=nrDeletes;
+            int sum=0;
+
+
+
+            if(tempDelete > requiredReplaceL1)
+            {
+                sum+=requiredReplaceL1;
+                tempDelete-=requiredReplaceL1;
+            }
+            else
+            {
+                sum+=tempDelete;  // se poate face return
+                tempDelete = 0;
+            }
+            if(tempDelete > requiredReplaceL2*2)
+            {
+                sum+=requiredReplaceL2*2;
+                tempDelete-=requiredReplaceL2*2;
+            }
+            else
+            {
+                sum+=Math.max(tempDelete,0);
+                tempDelete=0;
+            }
+            if(tempDelete > requiredReplaceL0*3)
+            {
+                sum+=requiredReplaceL0*3;
+            }
+            else
+            {
+                sum+=Math.max(tempDelete,0);
+            }
+
+            MINIM+=nrDeletes+Math.max(nrReplaces-sum,needsLUD);
+
         }
 
         return MINIM;
@@ -128,10 +159,9 @@ public class Checker {
     public static void main(String[] args) {
 
         //"bbaaaaaaaaaaaaaaacccccc"
-        String password = "aaaaaaaaaaaaaaaaaaaaa";
-        // System.out.println(strongPasswordChecker(password));
-        System.out.println(duplicate(password));
-        System.out.println(password.length());
+        //"aaaaAAAAAA000000123456"
+        String password = "bbaaaaaaaaaaaaaaacccccc";
         System.out.println(strongPasswordChecker(password));
+
     }
 }
