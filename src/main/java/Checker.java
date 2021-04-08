@@ -21,7 +21,7 @@
 *       3. conditia 3 se poate rezolva in mai multe moduri, dar tinand cont si de conditia 1 si de nr de miscari necesare, cel mai potrivit ar fi sa facem replace
 *
 *        edit - este nevoie de length/3 actiuni     (length este lungimea subsirului care contine caractere identice)
-*        insert - este nevoie de length-1/2
+*        insert - este nevoie de (length-1)/2
 *        delete -este nevoie de length - 2
 *
 *
@@ -111,9 +111,14 @@ public class Checker {
             MINIM+=Math.max(needsLUD,nrReplaces);
 
         }
-        if(password.length() > 20)                                                  // case 3
+                                                                                    // case 3
+        if(password.length() > 20)         // putem satisface constrangerea de length folosind operatii de delete, iar apoi vom folosi replace pentru a satisface celelalte 2 constrangeri
         {
-
+            int nrReplaces = 0;
+            nrReplaces = duplicate(password);
+            int nrDeletes = password.length()-20;
+            nrReplaces-=nrDeletes;
+            MINIM+=nrDeletes+Math.max(nrReplaces,needsLUD);
         }
 
         return MINIM;
@@ -122,7 +127,8 @@ public class Checker {
 
     public static void main(String[] args) {
 
-        String password = "aaaaaaaaaa";
+        //"bbaaaaaaaaaaaaaaacccccc"
+        String password = "aaaaaaaaaaaaaaaaaaaaa";
         // System.out.println(strongPasswordChecker(password));
         System.out.println(duplicate(password));
         System.out.println(password.length());
