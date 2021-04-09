@@ -62,13 +62,13 @@ public class Checker {
             while (i < password.length() && password.charAt(i) == password.charAt(start))
                 i++;
 
-            if (i-start >=3)
+            if (i-start >=3)                        // verificam lungimea subsecventelor de char identice
             {
                 nrReplaces += (i-start)/3;          // este nevoie de length/3 actiuni
 
-                if(((i-start)-2) % 3  == 1)
+                if(((i-start)-2) % 3  == 1)         // numaram subsecventele pt a calcula mai tarziu nr de inlocuiri pe care le putem economisi facand 1*one delete uri
                     one++;
-                if(((i-start)-2) % 3  == 2)
+                if(((i-start)-2) % 3  == 2)         // numaram subsecventele pt a calcula mai tarziu nr de inlocuiri pe care le putem economisi facand 2*two delete uri
                     two++;
                                                     // cazul de %3 == 0 va rezulta din nrReplaces-one-two
 
@@ -112,33 +112,34 @@ public class Checker {
             int nrReplaces = duplicate(password);
             int nrDeletes = password.length()-20;
             int tempDelete=nrDeletes;
-            int sum=0;
+            int nrReplacesEcon=0;
 
 
-            if(tempDelete > requiredReplaceL1)
+            if(tempDelete > requiredReplaceL1)      // daca nr delete > nr secvente care necesita 1 delete pt a economisi un replace, cazul (L-2) % 3 = 1
             {
-                sum+=requiredReplaceL1;
+                nrReplacesEcon+=requiredReplaceL1;
                 tempDelete-=requiredReplaceL1;
             }
             else
             {
-                sum+=tempDelete;
-                //tempDelete=0;                pot sa dau direct return
-                return nrDeletes+Math.max(nrReplaces-sum,needsLUD);
+                nrReplacesEcon+=tempDelete;                                     // economisim doar atatea replace uri cate delete uri trebuie sa facem, (le folosim pe toate)
+
+                return nrDeletes+Math.max(nrReplaces-nrReplacesEcon,needsLUD);  // nu ne-au ramas delete uri, deci nu mai putem economisi alte replace uri
             }
-            if(tempDelete > 0)
+            if(tempDelete > 0)                                                  // daca mai avem delete uri ramase, tratam cazul (L-2) % 3 = 2
             {
-                if(tempDelete < 2* requiredReplaceL2)
-                    sum+=tempDelete/2;
+                if(tempDelete < 2*requiredReplaceL2)        // daca nr delete < nr secvente care necesita 2 delete pt a economisi un replace
+                    nrReplacesEcon += tempDelete/2;         // salvam un nr de replace uri egal cu jumatate din numarul de delete
                 else
-                    sum+=requiredReplaceL2;
-                tempDelete-=2*requiredReplaceL2;
+                    nrReplacesEcon += requiredReplaceL2;    // actualizam numarul de replace uri salvate
+
+                tempDelete -= 2*requiredReplaceL2;          // actualizam nr delete ramase
             }
-            if(tempDelete > 0)          // cazul pentru subsectiuni de (L-2) % 3 = 0
-                sum+=tempDelete/3;
+            if(tempDelete > 0)                              // cazul  (L-2) % 3 = 0, daca ne-au ramas delete uri nefolosite, salvam atatea replace uri cat nr delete / 3 mai avem
+                nrReplacesEcon += tempDelete / 3;
 
 
-            MINIM+=nrDeletes+Math.max(nrReplaces-sum,needsLUD);
+            MINIM += nrDeletes+Math.max(nrReplaces-nrReplacesEcon, needsLUD);
         }
 
         return MINIM;
