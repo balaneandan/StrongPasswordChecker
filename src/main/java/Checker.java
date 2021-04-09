@@ -30,9 +30,9 @@
 public class Checker {
 
 
-    public static int requiredReplaceL0=0;
     public static int requiredReplaceL1=0;
     public static int requiredReplaceL2=0;
+
 
     public static boolean hasLowerCase(String password)
     {
@@ -53,7 +53,6 @@ public class Checker {
         int nrReplaces = 0;
         int one =0;
         int two=0;
-        int three =0;
         int start = 0;
         int i=0;
         while( i < password.length())
@@ -71,14 +70,13 @@ public class Checker {
                     one++;
                 if(((i-start)-2) % 3  == 2)
                     two++;
-                if(((i-start)-2) % 3  == 2)
-                    three++;
+                                                    // cazul de %3 == 0 va rezulta din nrReplaces-one-two
 
             }
         }
         requiredReplaceL1 = one;
         requiredReplaceL2 = two;
-        requiredReplaceL0 = three;
+
         return  nrReplaces;
     }
 
@@ -111,12 +109,10 @@ public class Checker {
         if(password.length() > 20)         // putem satisface constrangerea de length folosind operatii de delete, iar apoi vom folosi replace pentru a satisface celelalte 2 constrangeri
         {
 
-            int nrReplaces = 0;
-            nrReplaces = duplicate(password);
+            int nrReplaces = duplicate(password);
             int nrDeletes = password.length()-20;
             int tempDelete=nrDeletes;
             int sum=0;
-
 
 
             if(tempDelete > requiredReplaceL1)
@@ -126,30 +122,23 @@ public class Checker {
             }
             else
             {
-                sum+=tempDelete;  // se poate face return
-                tempDelete = 0;
+                sum+=tempDelete;
+                //tempDelete=0;                pot sa dau direct return
+                return nrDeletes+Math.max(nrReplaces-sum,needsLUD);
             }
-            if(tempDelete > requiredReplaceL2*2)
+            if(tempDelete > 0)
             {
-                sum+=requiredReplaceL2*2;
-                tempDelete-=requiredReplaceL2*2;
+                if(tempDelete < 2* requiredReplaceL2)
+                    sum+=tempDelete/2;
+                else
+                    sum+=requiredReplaceL2;
+                tempDelete-=2*requiredReplaceL2;
             }
-            else
-            {
-                sum+=Math.max(tempDelete,0);
-                tempDelete=0;
-            }
-            if(tempDelete > requiredReplaceL0*3)
-            {
-                sum+=requiredReplaceL0*3;
-            }
-            else
-            {
-                sum+=Math.max(tempDelete,0);
-            }
+            if(tempDelete > 0)          // cazul pentru subsectiuni de (L-2) % 3 = 0
+                sum+=tempDelete/3;
+
 
             MINIM+=nrDeletes+Math.max(nrReplaces-sum,needsLUD);
-
         }
 
         return MINIM;
@@ -160,7 +149,7 @@ public class Checker {
 
         //"bbaaaaaaaaaaaaaaacccccc"
         //"aaaaAAAAAA000000123456"
-        String password = "bbaaaaaaaaaaaaaaacccccc";
+        String password = "FFFFFFFFFFFFFFF11111111111111111111AAA";
         System.out.println(strongPasswordChecker(password));
 
     }
